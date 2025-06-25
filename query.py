@@ -12,5 +12,6 @@ def get_all_blacklist():
 
 # ตัวอย่างการใช้งาน
 if __name__ == "__main__":
-    for row in get_all_blacklist():
-        print(f"ID: {row[0]}, Name: {row[1]}, Status: {row[2]}")
+    # for row in get_all_blacklist():
+    #     print(f"ID: {row[0]}, Name: {row[1]}, Status: {row[2]}")
+    print(get_all_blacklist())

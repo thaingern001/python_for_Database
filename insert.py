@@ -24,7 +24,7 @@ def insert_new_blacklist(id, name, status):
         connection.close()
 
 def generate_random_blacklist_user():
-    fake = Faker('th_TH')
+    fake = Faker('en_US')
     id_card = ''.join([str(random.randint(0, 9)) for _ in range(13)])
     name = fake.name()
     status = random.choice(["blacklisted", "cleared", "under_review"])
@@ -62,13 +62,13 @@ def generate_random_bank_user():
 
 
 
-for _ in range(0):
+for _ in range(1):
     id_card, name, status = generate_random_blacklist_user()
     insert_new_blacklist(id_card, name, status)   
 # data = ("0000000000001", "Sommai jaidee ", "blacklisted")
 # insert_new_blacklist(data[0],data[1],data[2])
 
-for _ in range(1):
-    bank_name = "scb"
+for _ in range(0):
+    bank_name = "kbank"
     id_card, bank_num, name, balance = generate_random_bank_user()
     insert_new_bank_user(bank_name,id_card, bank_num, name, balance)  
