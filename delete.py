@@ -11,3 +11,7 @@ def delete_blacklist_user(id_card):
             print(f"ลบข้อมูลของ id_card: {id_card} สำเร็จแล้ว")
     finally:
         connection.close()
+        
+
+id_card_delete = ""
+delete_blacklist_user(id_card_delete)

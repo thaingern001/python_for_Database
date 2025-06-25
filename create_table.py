@@ -7,10 +7,12 @@ connection = get_connection()
 def create_blacklist_table():
     try:
         with connection.cursor() as cursor:
+            # สร้างตารางใหม่แยก first_name และ last_name
             create_table_sql = """
-            CREATE TABLE IF NOT EXISTS blacklist (
+            CREATE TABLE blacklist (
                 id_card VARCHAR(13) PRIMARY KEY,
-                name VARCHAR(100) NOT NULL,
+                first_name VARCHAR(50) NOT NULL,
+                last_name VARCHAR(50) NOT NULL,
                 status VARCHAR(20) NOT NULL
             );
             """
@@ -20,17 +22,22 @@ def create_blacklist_table():
     finally:
         connection.close()
 
+# create_blacklist_table()
 
 
+
+        
 def create_bank_table(bank_name):
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
+            # cursor.execute(f"DROP TABLE IF EXISTS {bank_name};")
             create_table_sql = f"""
-            CREATE TABLE IF NOT EXISTS {bank_name} (
+            CREATE TABLE {bank_name} (
                 id_card VARCHAR(13) PRIMARY KEY,
                 bank_num VARCHAR(13) NOT NULL,
-                name VARCHAR(100) NOT NULL,
+                first_name VARCHAR(50) NOT NULL,
+                last_name VARCHAR(50) NOT NULL,
                 balance INT NOT NULL
             );
             """
@@ -39,6 +46,7 @@ def create_bank_table(bank_name):
             print(f"Table '{bank_name}' created successfully.")
     finally:
         connection.close()
+
 
 #ทำไปละ
 bank_names = [

@@ -3,22 +3,29 @@ from faker import Faker
 import random
 from db import get_connection
 
-#blacklist
-def insert_new_blacklist(id, name, status):
+def split_name(full_name):
+    parts = full_name.strip().split()
+    if len(parts) == 0:
+        return "", ""
+    elif len(parts) == 1:
+        return parts[0], ""
+    else:
+        return parts[0], " ".join(parts[1:])  # first word = first_name, rest = last_name
+
+# blacklist
+def insert_new_blacklist(id_card, first_name, last_name, status):
     connection = get_connection()
     try:
         cursor = connection.cursor()
-
-        insert_sql = "INSERT INTO blacklist (id_card, name, status) VALUES (%s, %s, %s)"
-        data = (id, name, status)
+        insert_sql = "INSERT INTO blacklist (id_card, first_name, last_name, status) VALUES (%s, %s, %s, %s)"
+        data = (id_card, first_name, last_name, status)
         cursor.execute(insert_sql, data)
         connection.commit()
 
         cursor.execute("SELECT * FROM blacklist")
         results = cursor.fetchall()
-
         for row in results:
-            print(f"id_card: {row[0]}, name: {row[1]}, status: {row[2]}")
+            print(f"id_card: {row[0]}, first_name: {row[1]}, last_name: {row[2]}, status: {row[3]}")
     finally:
         cursor.close()
         connection.close()
@@ -26,49 +33,47 @@ def insert_new_blacklist(id, name, status):
 def generate_random_blacklist_user():
     fake = Faker('en_US')
     id_card = ''.join([str(random.randint(0, 9)) for _ in range(13)])
-    name = fake.name()
+    full_name = fake.name()
+    first_name, last_name = split_name(full_name)
     status = random.choice(["blacklisted", "cleared", "under_review"])
-    return id_card, name, status
+    return id_card, first_name, last_name, status
 
-
-#insert new user for bank
-def insert_new_bank_user(bank_name, id_card, bank_num, name, balance):
+# bank user
+def insert_new_bank_user(bank_name, id_card, bank_num, first_name, last_name, balance):
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
             insert_sql = f"""
-            INSERT INTO {bank_name} (id_card, bank_num, name, balance)
-            VALUES (%s, %s, %s, %s)
+            INSERT INTO {bank_name} (id_card, bank_num, first_name, last_name, balance)
+            VALUES (%s, %s, %s, %s, %s)
             """
-            data = (id_card, bank_num, name, balance)
+            data = (id_card, bank_num, first_name, last_name, balance)
             cursor.execute(insert_sql, data)
             connection.commit()
 
             cursor.execute(f"SELECT * FROM {bank_name}")
             results = cursor.fetchall()
-
             for row in results:
-                print(f"id_card: {row[0]}, bank_num: {row[1]}, name: {row[2]}, balance: {row[3]}")
+                print(f"id_card: {row[0]}, bank_num: {row[1]}, first_name: {row[2]}, last_name: {row[3]}, balance: {row[4]}")
     finally:
         connection.close()
-        
+
 def generate_random_bank_user():
     fake = Faker('en_US')
     id_card = ''.join([str(random.randint(0, 9)) for _ in range(13)])
     bank_num = ''.join([str(random.randint(0, 9)) for _ in range(13)])
-    name = fake.name()
+    full_name = fake.name()
+    first_name, last_name = split_name(full_name)
     balance = 10000
-    return id_card, bank_num, name, balance
+    return id_card, bank_num, first_name, last_name, balance
 
 
+# # Example usage
+# for _ in range(1):
+#     id_card, first_name, last_name, status = generate_random_blacklist_user()
+#     insert_new_blacklist(id_card, first_name, last_name, status)
 
 for _ in range(1):
-    id_card, name, status = generate_random_blacklist_user()
-    insert_new_blacklist(id_card, name, status)   
-# data = ("0000000000001", "Sommai jaidee ", "blacklisted")
-# insert_new_blacklist(data[0],data[1],data[2])
-
-for _ in range(0):
     bank_name = "kbank"
-    id_card, bank_num, name, balance = generate_random_bank_user()
-    insert_new_bank_user(bank_name,id_card, bank_num, name, balance)  
+    id_card, bank_num, first_name, last_name, balance = generate_random_bank_user()
+    insert_new_bank_user(bank_name, id_card, bank_num, first_name, last_name, balance)
