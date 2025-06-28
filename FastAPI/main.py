@@ -3,36 +3,58 @@ from typing import Optional
 from pymongo import MongoClient
 from bson.json_util import dumps
 from datetime import datetime
+import json
+import os
 
-# เชื่อม MongoDB
 client = MongoClient("mongodb://localhost:27017/")
 db = client["mydatabase"]
 collection = db["cases"]
 
 app = FastAPI()
 
+LAST_SYNC_FILE = "last_sync.json"
+
+# อ่านเวลาจากไฟล์
+def read_last_sync_time(path=LAST_SYNC_FILE):
+    if not os.path.exists(path):
+        return None
+    try:
+        with open(path, "r") as f:
+            data = json.load(f)
+            return data["last_updated"]
+    except:
+        return None
+
+# เขียนเวลาใหม่ลงไฟล์
+def save_last_sync_time(timestamp: datetime, path=LAST_SYNC_FILE):
+    with open(path, "w") as f:
+        json.dump({"last_updated": timestamp.isoformat() + "Z"}, f)
+
 @app.get("/")
 def read_root():
-    return {"message": "FastAPI connected!"}
+    return {"message": "✅ FastAPI MongoDB running"}
 
+# ดึงข้อมูลใหม่จาก updatedAt และอัปเดตเวลาในไฟล์
 @app.get("/cases/latest")
-def get_latest_cases(since: Optional[str] = Query(None, description="ISO8601 timestamp (e.g. 2025-06-25T10:00:00Z)")):
+def get_latest_cases():
     try:
-        if since:
-            since_dt = datetime.fromisoformat(since.replace("Z", "+00:00"))
+        last_time_str = read_last_sync_time()
+        if last_time_str:
+            since_dt = datetime.fromisoformat(last_time_str.replace("Z", "+00:00"))
             query = {"updatedAt": {"$gt": since_dt}}
         else:
             query = {}
 
-        docs = collection.find(query)
+        # ดึงและเรียงจากเวลาน้อย → มาก
+        docs = list(collection.find(query).sort("updatedAt", 1))
 
-        # ใช้ bson.json_util.dumps เพื่อแปลง ObjectId และ datetime
-        json_data = json.loads(dumps(docs))  # แปลงเป็น Python JSON พร้อมใช้งาน
+        # ถ้ามีข้อมูลใหม่ ให้เก็บ updatedAt ล่าสุดไว้
+        if docs:
+            latest_time = docs[-1]["updatedAt"]
+            if isinstance(latest_time, datetime):
+                save_last_sync_time(latest_time)
 
-        return json_data
+        return json.loads(dumps(docs))
 
     except Exception as e:
-        import traceback
-        traceback.print_exc()
         return {"error": str(e)}
-
