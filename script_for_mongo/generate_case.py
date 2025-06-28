@@ -18,6 +18,11 @@ def random_bank_name():
 def random_account_type():
     return random.choice(["Savings", "Checking", "Fixed"])
 
+thai_provinces = [
+    "Bangkok", "Chiang Mai", "Khon Kaen", "Chonburi", "Phuket",
+    "Ubon Ratchathani", "Nakhon Si Thammarat", "Lampang", "Nakhon Sawan", "Surat Thani"
+]
+
 def generate_case():
     now = datetime.now()
     person = fake.simple_profile()
@@ -51,14 +56,14 @@ def generate_case():
                 "address": address,
                 "district": fake.city(),
                 "subDistrict": fake.city_suffix(),
-                "province": fake.province(),
+                "province": random.choice(thai_provinces),
                 "postalCode": fake.postcode()
             },
             "currentAddress": {
                 "address": fake.street_address(),
                 "district": fake.city(),
                 "subDistrict": fake.city_suffix(),
-                "province": fake.province(),
+                "province": random.choice(thai_provinces),
                 "postalCode": fake.postcode()
             }
         },
@@ -101,6 +106,8 @@ def generate_case():
         "updatedAt": now,
         "__v": 0
     }
+    
+    
 
 # ใช้งานจริง
 if __name__ == "__main__":
