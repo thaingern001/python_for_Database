@@ -110,4 +110,4 @@ if __name__ == "__main__":
 
     document = generate_case()
     collection.insert_one(document)
-    print("✅ Inserted random generated case for:", document["user"]["firstName"], document["user"]["lastName"])
+    print(" Inserted random generated case for:", document["user"]["firstName"], document["user"]["lastName"])
