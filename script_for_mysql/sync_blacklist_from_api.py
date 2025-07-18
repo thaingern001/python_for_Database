@@ -1,9 +1,23 @@
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import requests
 import pymysql
-from db import get_connection
-from your_existing_module import insert_new_blacklist, split_name
+# from db import get_connection
+from utils import insert_new_blacklist, split_name
+import time
 
-API_URL = "http://127.0.0.1:8000/cases/latest"
+API_URL = "http://127.0.0.1:8001/cases/latest"
+
+
+def get_connection():
+    return pymysql.connect(
+        host='localhost',
+        user='root',
+        password='1234',
+        database='testdb',
+        port=3306
+    )
 
 def id_card_exists(id_card):
     connection = get_connection()
@@ -17,10 +31,13 @@ def id_card_exists(id_card):
         connection.close()
 
 def sync_blacklist():
+    print("start sync")
     try:
         response = requests.get(API_URL)
         response.raise_for_status()
         cases = response.json()
+        
+        print(f"Fetched {len(cases)} cases")
 
         for case in cases:
             # ตัวอย่างดึงจาก user field
@@ -41,3 +58,7 @@ def sync_blacklist():
 
 if __name__ == "__main__":
     sync_blacklist()
+
+    while True:
+        sync_blacklist()
+        time.sleep(10)
